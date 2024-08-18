@@ -3,7 +3,7 @@ package shopping.product.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import shopping.product.dto.BookDto;
+import shopping.product.dto.ProductDto;
 import shopping.product.service.ProductService;
 
 import java.util.ArrayList;
@@ -20,69 +20,67 @@ public class ProductController {
     private ProductService productService;
 
 
-    /** 상품 목록 조회
-     *
-     * @return
-     */
+    // 상품 목록 조회
     @GetMapping("/products")
-    public List<BookDto> findAll() {
-        List<BookDto> bookList = new ArrayList<>();
+    public List<ProductDto> findAll() {
+        List<ProductDto> productList = productService.findAll();
 
-        return bookList;
+        return productList;
     }
 
-    /** 특정 상품 조회 기능
-     *
-     * @param productId
-     * @return
-     */
-    @GetMapping("/products")
-    public Map<String, String> findById(@RequestParam("productId") int productId) {
+
+    // 특정 상품 조회
+    @GetMapping("/products/{productId}")
+    public Map<String, String> findById(@RequestParam("productId") Long productId) {
         Map<String, String> result = new HashMap<String, String>();
 
+        result = productService.findById(productId);
 
         return result;
     }
 
 
-    /** 상품 추가 기능
-     *
-     * @param book
-     * @return
-     */
+
+    // 상품 추가
     @PostMapping("/products")
-    public String insertByMap(@RequestBody Map<String, String> book) {
+    public Map<String,String> save(@RequestBody Map<String, String> product) {
         Map<String, String> result = new HashMap<String, String>();
 
-        if (productService.check(book.get("name"))) {
-
+        if (!productService.check(product.get("name"))) {
+            result.put("resultMsg", "상품 명명규칙이 잘못되었습니다.");
+            return result;
         }
 
+        result = productService.save(product);
 
-        return "";
-    }
-
-    /**
-     * 상품 수정 기능
-     * @param book
-     * @return
-     */
-    @PutMapping("products")
-    public Map<String,String> updateByMap(@RequestBody  Map<String, String> book) {
-        Map<String, String> result = new HashMap<String, String>();
 
         return result;
     }
 
-    /** 상품 삭제 기능
-     *
-     * @param ProductId
-     * @return
-     */
-    @DeleteMapping("products")
-    public String deleteById(@RequestParam int ProductId) {
 
-        return "";
+    // 상품 수정
+    @PutMapping("products")
+    public Map<String,String> update(@RequestBody  Map<String, String> product) {
+        Map<String, String> result = new HashMap<String, String>();
+
+        if (!productService.check(product.get("name"))) {
+            result.put("resultMsg", "상품 명명규칙이 잘못되었습니다.");
+            return result;
+        }
+
+        result = productService.update(product);
+
+        return result;
+    }
+
+
+    // 상품 삭제
+    @DeleteMapping("products")
+    public String deleteById(@RequestParam Long productId) {
+
+        productService.deleteById(productId);
+
+        return "삭제 완료";
     }
 
 }
